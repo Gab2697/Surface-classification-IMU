@@ -2,7 +2,7 @@
 Classification of different running surface using deep learning methods and sEMG/IMU sensors
 
 Pre-processing of signals
-For the following steps the tool box BiomechZoo was used in matlab to facilitate batch processing.
+For the following steps the tool box BiomechZoo was used in matlab to facilitate batch processing. To run this code it is necessary to add to the MATLAB path the BiomechZoo-master (https://github.com/PhilD001/biomechZoo).
 1. The outputted excel files were converted to zoo files. To do so, the function Xsens2zoo (for the IMU signals ) and the function EMG2zoo (for the EmG signals) were used.
 2. Specific channels were selected from all the different output signals of the sensors using the function bmech_removechannel. More specifically, for the IMU sensors, the acceleration, angular velocity and joint angle data for all seventeen sensors with 3 degree of freedom motions ( x-y-z axis and flexion-extension, abduction-adduction and internal-external rotation). For the EMG sensors the time and muscle contraction of Tibialis anterior, Gastrocnemius, Rectus Femoris and Bicep Femoris were kept.
 3. A few more steps were conducted on the EMG signal for pre-processing. The raw signals were first high pass filtered (XXX), then low pass filtered, the rectified EMG was calculated, the EMG envelop was found and finally the EMG RMS. To filter, rectify and find the RMS of the signal the function bmech_emgprocess was used. To find the emg envelop the function EMG_envelop was used. To normalize the data using the maximum muscle contraction of each trial, the function normMax_data was used.
