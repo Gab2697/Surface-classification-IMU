@@ -29,9 +29,11 @@ The following steps were conducted in python to use the machine learning and dat
 5. Separate the train, validation, and test set subject-wise using the subject_wise_split function. This allows us to both split the datasets with completely different participant in train, test and validation sets or to shuffle all trials and have a few trials of each participant's testing in all the different subsets.
 6. One hot encoding of the labels using the function one_hot.
 <img width="422" alt="Screen Shot 2022-04-11 at 10 19 52 AM" src="https://user-images.githubusercontent.com/83525182/162760371-224654a8-820f-4df9-8fff-452ae476f16d.png">
+
 7. Tuning 1D-CNN models with validation set:
   - Tune hyperparameters (epoch, batch size, learning rate, optimization function) with SearchGrid (function EMG_GC_tuningCNN) and keras tuner (to be added). 
   - Tune the model architecture (number layers, filter, kernel, dropout, regularization) (function EMG_GC_tuningCNN)
+
 8. Test different combinations of signal type/location with function Sensor_opt.
 
 
