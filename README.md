@@ -50,4 +50,6 @@ The following steps were conducted in python to use the machine learning and dat
 
 6. Test different combinations of signal type/location with function Sensor_opt.
 
+7. Results were compared when seperating the datasets subject-wise vs not subject wise (function SUBJECT-WISE_VS_NOT).
+
 
