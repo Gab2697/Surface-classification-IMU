@@ -1,6 +1,8 @@
 # Surface-classification-EMG/IMU
 Classification of different running surface using deep learning methods and sEMG/IMU sensors
 
+*****IMPORTANT: This is still a work in progress (for the Classification task section). The codes should be completed in the following weeks.*****
+
 Pre-processing of signals
 For the following steps the toolbox BiomechZoo was used in MATLAB to facilitate batch processing. To run the preprocessing steps, it is necessary to add to the MATLAB path of the BiomechZoo-master (https://github.com/PhilD001/biomechZoo).
 The main function to run for preprocessing steps is called Main_processing.
