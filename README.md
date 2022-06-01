@@ -31,7 +31,7 @@ In this last step, two columns were added at the end of the table for the surfac
 
 ### Step E) Reshaping in python
 One main function was used for all the steps conducted in python (THE_CODE_IMU) and this code can be found in the GitHub https://github.com/Gab2697/Surface-classification-EMG-IMU .
-First the .mat files were loaded into python and converted into the correct tensor shape demonstrated in Figure 3, which is #trials  #frames  # channels (function: mat_to_tensor). The labels were one hot encoded (function: one_hot).
+First the .mat files were loaded into python and converted into the correct tensor shape demonstrated in Figure 3, which is #trials, #frames, # channels (function: mat_to_tensor). The labels were one hot encoded (function: one_hot).
 
   <img width="252" alt="image" src="https://user-images.githubusercontent.com/83525182/171494727-96003363-28ac-4163-ad37-c2faab9e9dd8.png">
 Figure 3:  Tensor format for CNN input.
