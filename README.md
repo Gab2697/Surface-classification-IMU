@@ -75,7 +75,9 @@ Two different splitting approaches were tested in this thesis: Subject-wise and 
 Both the acceleration and angular velocity were tested with the final optimized model using the best sensor combination from Table 2. Precision, recall and f1-score were obtained for both surfaces (see following equations).
 
 (1) 𝑃𝑟𝑒𝑐𝑖𝑠𝑖𝑜𝑛= 𝑇𝑟𝑢𝑒 𝑃𝑜𝑠𝑖𝑡𝑖𝑣𝑒 / (𝑇𝑟𝑢𝑒 𝑃𝑜𝑠𝑖𝑡𝑖𝑣𝑒 + 𝐹𝑎𝑙𝑠𝑒 𝑃𝑜𝑠𝑖𝑡𝑖𝑣𝑒)
+
 (2) 𝑅𝑒𝑐𝑎𝑙𝑙= 𝑇𝑟𝑢𝑒 𝑃𝑜𝑠𝑖𝑡𝑖𝑣𝑒 / (𝑇𝑟𝑢𝑒 𝑃𝑜𝑠𝑖𝑡𝑖𝑣𝑒 + 𝐹𝑎𝑙𝑠𝑒 𝑁𝑒𝑔𝑎𝑡𝑖𝑣𝑒)
+
 (3) 𝐹1 𝑠𝑐𝑜𝑟𝑒= 2 𝑥 (𝑃𝑟𝑒𝑐𝑖𝑠𝑖𝑜𝑛 𝑥 𝑅𝑒𝑐𝑎𝑙𝑙) / (𝑃𝑟𝑒𝑐𝑖𝑠𝑖𝑜𝑛 + 𝑅𝑒𝑐𝑎𝑙𝑙)
 
 The final model with the optimal sensor combination, splitting approach and pre-processing steps, was tested with a 5-fold cross validation approach using the testing set (Figure 5). 
