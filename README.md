@@ -1,55 +1,84 @@
-# Surface-classification-EMG/IMU
-Classification of different running surface using deep learning methods and sEMG/IMU sensors
+1. Data Pre-processing Steps
+Pre-processing steps were done with the raw signals using Matlab (The Mathworks, Inc., Natick, USA) and the biomechZoo toolbox (https://github.com/PhilD001/biomechZoo).  The main code for step A to D can be found in the function Main_preprocessing. 
+The final reshaping of signals into tensors were conducted in Python software (Python Software Foundation, https://www.pyton.org/) on Google’s Colaboratory Pro+ GPU (GPU: 1xTesla P100, 54.8 GB RAM) (Steps E). 
+All the functions used in the above steps can be found in the GitHub https://github.com/Gab2697/Surface-classification-EMG-IMU .
+Figure 1 summarizes the pre-processing steps discussed in the next section of this thesis.
+ 
+ <img width="465" alt="image" src="https://user-images.githubusercontent.com/83525182/171494809-c292e8fb-22a4-4d72-86d5-025acc0e841b.png">
+Figure 1: Flow chart for pre-processing steps.
 
-*****IMPORTANT: This is still a work in progress (for the Classification task section). The codes should be completed in the following weeks.*****
+Step A) Conversion and channel selection 
 
-Pre-processing of signals
-For the following steps the toolbox BiomechZoo was used in MATLAB to facilitate batch processing. To run the preprocessing steps, it is necessary to add to the MATLAB path of the BiomechZoo-master (https://github.com/PhilD001/biomechZoo).
-The main function to run for preprocessing steps is called Main_processing.
-1. The outputted excel files from the data collection softwares (Xsens MVN and EMGworks Acquisition) were converted to zoo files. To do so, the function Xsens2zoo (for the IMU signals) and the function EMG2zoo (for the EMG signals) were used.
+The outputted Excel files from the data collection software (Xsens MVN) were converted to zoo files (functions: Xsens2zoo) in MATLAB to use the functions in the toolbox BiomecZoo (P. C. Dixon et al., 2017).
 
-2. Specific channels were selected from all the different output signals of the sensors using the function bmech_removechannel. More specifically, for the 17 IMU sensors, the x-y-z acceleration, x-y-z angular velocity and joint angle data (flexion extension, abduction-adduction and internal-external rotation). For the 4 EMG sensors the time and muscle contraction of Tibialis anterior, Gastrocnemius, Rectus Femoris and Bicep Femoris were kept.
+Step B) Cut trials and Gait cycle segmentation
+This is the first element that was tested in the results section of this thesis. Two different signal separation approaches were compared using the lower body sensors combination. The first one was a four second section of the trials without the acceleration and deceleration phases. The second one was to extract gait cycles from those trials and use them as the inputs for the model. Two functions were used to separate the trials into gait cycles (function: gait_event_knee, outdoor_gait_cycle_data_Knee). The first function was used to create events to identify knee flexion at heel strike which is the minimum value between two peaks (P. C. Dixon et al., 2017). 
+Has it can be observed in Figure 2, peak knee flexions can easily be identified. Then, the first local minimum between each peak are identified as heel strikes. 
 
-3. A few more steps were conducted on the EMG signals for pre-processing. The raw signals were first high pass filtered (20) and low pass filtered (500). Then, rectified EMG, the EMG envelope and the EMG Root Mean Square (RMS) was calculated. To filter, rectify and find the RMS of the signal the function bmech_emgprocess was used. To find the EMG envelope the function EMG_envelop was used. To normalize the data using the maximum muscle contraction of each trial, the function normMax_data was used.
+ <img width="222" alt="image" src="https://user-images.githubusercontent.com/83525182/171494768-580e2031-a910-417e-b440-fe4c93a53ec2.png">
+Figure 2: Peak Knee flexion for gait event identification.
 
-4. Then the IMU data and the EMG data were merged into a common library. The function IMU_EMG_RS240_sync_merge was used. To do so three steps have to be executed:
-- Resample the data into a common sample frequency which was 240 Hz (the original sample frequency of the IMU data).
-*Option to test a different sampling rate with function IMU_EMG_RS1926_sync_merge.
-- Synchronize both signals removing the delay between the data collected using a cross correlation function.
-*Data collected on two different software and there was a delay between pressing start on the recording of one software and then the other). The data collection was always done in this order: Start EMGworks Acquisition, start Xsens MVN, stop EMGworks Acquisition, stop Xsens MVN.
-- Finally, both sensors could be merged into a common table.
+The second function segmented the trials into gait cycles. All gait cycles were time normalized to 101 sample points (function: bmech_normalize).
 
-5. Afterwards, the data could be separated into gait cycles. The function gait_event_knee and outdoor_gait_cycle_data_Knee were used for gait cycle identification and data separation.
+Step C) Normalization
+The second pre-processing step that was evaluated in the result section is the impact of max-normalization on the input signals. To do so, all signals were normalized using the max value of each gait cycles to bring them to a common scale between zero and one (function: normMax_data).
 
-6. Some channels were removed to lighten the final exported table using the same function has step 2 (bmech_removechannel).
+Step D) Table extraction
+In this last step, two columns were added at the end of the table for the surface type and the participant number, respectively (function: extract_filestruct). Finally, table data were exported to a .mat file for further processing in python (function: table2struct).
 
-7. The gait cycles were normalized into a common length of 100 data points using the function bmech_normalize.
+Step E) Reshaping in python
+One main function was used for all the steps conducted in python (THE_CODE_IMU) and this code can be found in the GitHub https://github.com/Gab2697/Surface-classification-EMG-IMU .
+First the .mat files were loaded into python and converted into the correct tensor shape demonstrated in Figure 3, which is #trials  #frames  # channels (function: mat_to_tensor). The labels were one hot encoded (function: one_hot).
 
-8. During the trials, the participant had to run for a prolonged period. Some trials had to be removed due to sweat accumulation between the electrode and the skin. To clean those bad trials, a function called remove_sweat was created. This function compares each EMG envelop of each gait cycles to the wanted EMG envelope found in previously published literature. The function only keeps the signals with a similar pattern to the what the EMG envelope should look like for those muscles while running.
-
-9. Finaly, the function extract_filestruct adds a column for the surface type and the participant number into the final table.
-
-10. And the function table2struct creates the table to be exported into a .mat file.
+  <img width="252" alt="image" src="https://user-images.githubusercontent.com/83525182/171494727-96003363-28ac-4163-ad37-c2faab9e9dd8.png">
+Figure 3:  Tensor format for CNN input.
 
 
-Classification task
-The following steps were conducted in python to use the machine learning and data analysis Python packages (e.g., Tensorflow, PyTorch, Numpy, Scipy, Scikit-learn, Pandas) to build the CNN model.
-1. Load the .mat files and convert them into tensors with the correct format of (#trials, #frames, # channels) using the function mat_to_tensor.
+2. Developing the CNN Model
 
-2. Seperate the different signal types into different datasets (acceleration, angular velocity, EMG).
-*Also seperate into individual sensors (17 different for IMU and 4 for EMG) to test wich sensor type/location combination gives the best classification results (Functions: seperate_EMG_signals,seperate_acc_signals,seperate_gyro_signals). 
+The following steps were conducted with Python software (Python Software Foundation, https://www.pyton.org/) on Google’s Colaboratory Pro+ GPU (GPU: 1xTesla P100, 54.8 GB RAM). Machine learning and data analysis Python packages (e.g., Tensorflow, PyTorch, Numpy, Scipy, Scikit-learn, Pandas) were used for the deep learning task.
+One main function was used for all the following steps (THE_CODE_IMU) and this code can be found in the GitHub https://github.com/Gab2697/Surface-classification-EMG-IMU .
 
-3. Separate the train, validation, and test set subject-wise using the subject_wise_split function. This allows us to both split the datasets with completely different participant in train, test and validation sets or to shuffle all trials and have a few trials of each participant's testing in all the different subsets.
+Step A) Basic CNN model for sensor type/location testing
+Figure 4 demonstrate the initial basic model that was used to determine which sensor combination is optimal for this classification task.
 
-4. One hot encoding of the labels using the function one_hot.
-<img width="422" alt="Screen Shot 2022-04-11 at 10 19 52 AM" src="https://user-images.githubusercontent.com/83525182/162760371-224654a8-820f-4df9-8fff-452ae476f16d.png">
+ <img width="180" alt="image" src="https://user-images.githubusercontent.com/83525182/171494691-4317616f-00bc-45ea-8485-1c55c3819820.png">
+Figure 4: Basic model for premilary testing.
 
-5. Tuning 1D-CNN models with validation set:
-- Tune hyperparameters (epoch, batch size, learning rate, optimization function) with SearchGrid (function EMG_GC_tuningCNN) and keras tuner (to be added). 
-- Tune the model architecture (number layers, filter, kernel, dropout, regularization) (function EMG_GC_tuningCNN)
+Multiple functions were created to test different combinations of sensors. Temporary files were created to save the two main dataset subsections:
+-	Acceleration (list of all signals in Appendix D)
+-	Angular velocity (list of all signals in Annex D)
 
-6. Test different combinations of signal type/location with function Sensor_opt.
+Only the subject-dependent approach was tested for the four sensor combinations (Table 1). All four-sensor combinations were tested for the acceleration and angular velocity signals.
 
-7. Results were compared when seperating the datasets subject-wise vs not subject wise (function SUBJECT-WISE_VS_NOT).
+Table 1:  Sensor combinations tested for acceleration and angular velocity.
+![image](https://user-images.githubusercontent.com/83525182/171495405-4f36d63f-0713-4af2-986b-489bdc4276a7.png)
+
+
+Step B) Tuning CNN models with validation set
+
+First, one to four convolutional layers were tested to determine the optimal general CNN architecture. Then, three different optimizers (Adam, RMSprop and SGD) and different batch sizes were evaluated for this classification task.
+Second, the model hyperparameters were tuned, using KerasTuner and a callback function for early stop (using the validation loss with a patience of 50). The learning rate, number of filters, kernel size, dropout and regularization ratio were tuned using the kerasTuner. The regularization parameter was also initially tested with KerasTuner but then removed due to lower performance on the validation accuracy when included in the model. The following steps were conducted using the optimal combination of sensors found in the previous section. The parameters evaluated can be found in Table 2.
+
+Table 2: Tuning the CNN model.
+![image](https://user-images.githubusercontent.com/83525182/171495363-5c91e1f8-4353-4127-9057-b921de8041a4.png)
+
+
+Step C) Train, validation, and test split
+
+Two different splitting approaches were tested in this thesis: Subject-wise and Subject-dependent split. The subject-wise split (leave-n-subject-out) splits the datasets with different participant in train, test, and validation sets (inter-subject split). The subject-dependent split shuffled all trials between different dataset subsections to train, validate and test the accuracy of the trained models (intra-subject split) (Funciton: subject_wise_split).
+
+Step D) Final model evaluated with testing set
+Both the acceleration and angular velocity were tested with the final optimized model using the best sensor combination from Table 2. Precision, recall and f1-score were obtained for both surfaces (see following equations).
+
+(1) 𝑃𝑟𝑒𝑐𝑖𝑠𝑖𝑜𝑛= 𝑇𝑟𝑢𝑒 𝑃𝑜𝑠𝑖𝑡𝑖𝑣𝑒 / (𝑇𝑟𝑢𝑒 𝑃𝑜𝑠𝑖𝑡𝑖𝑣𝑒 + 𝐹𝑎𝑙𝑠𝑒 𝑃𝑜𝑠𝑖𝑡𝑖𝑣𝑒)
+(2) 𝑅𝑒𝑐𝑎𝑙𝑙= 𝑇𝑟𝑢𝑒 𝑃𝑜𝑠𝑖𝑡𝑖𝑣𝑒 / (𝑇𝑟𝑢𝑒 𝑃𝑜𝑠𝑖𝑡𝑖𝑣𝑒 + 𝐹𝑎𝑙𝑠𝑒 𝑁𝑒𝑔𝑎𝑡𝑖𝑣𝑒)
+(3) 𝐹1 𝑠𝑐𝑜𝑟𝑒= 2 𝑥 (𝑃𝑟𝑒𝑐𝑖𝑠𝑖𝑜𝑛 𝑥 𝑅𝑒𝑐𝑎𝑙𝑙) / (𝑃𝑟𝑒𝑐𝑖𝑠𝑖𝑜𝑛 + 𝑅𝑒𝑐𝑎𝑙𝑙)
+
+The final model with the optimal sensor combination, splitting approach and pre-processing steps, was tested with a 5-fold cross validation approach using the testing set (Figure 5). 
+ 
+ <img width="328" alt="image" src="https://user-images.githubusercontent.com/83525182/171495580-92b42e23-7d5c-45fe-ad4d-ade7e2f31d40.png">
+Figure 5: 5-fold cross validation split organization.
+
 
 
